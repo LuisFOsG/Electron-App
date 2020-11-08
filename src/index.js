@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu} = require("electron");
+const { app, BrowserWindow, Menu, ipcMain} = require("electron");
 const url = require("url");
 const path = require("path");
 
@@ -9,10 +9,15 @@ if(process.env.NODE_ENV !== "production"){
 }
 
 let mainWindow;
-let nuevoProducto;
+let nuevaNota;
 
 app.on("ready", () => {
-    mainWindow = new BrowserWindow({});
+    mainWindow = new BrowserWindow({
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true
+        }
+    });
     mainWindow.loadURL(url.format({
         pathname: path.join(__dirname, "views/index.html"),
         protocol: "file",
@@ -28,30 +33,79 @@ app.on("ready", () => {
 });
 
 function creandoNuevaVentana() {
-    nuevoProducto = new BrowserWindow({
+    nuevaNota = new BrowserWindow({
+        webPreferences: {
+            nodeIntegration: true,
+            nodeIntegrationInWorker: true
+        },
         width: 400,
         height: 330,
         title: "Agregando Nuevo Producto",
     })
-    nuevoProducto.setMenu(null);
-    nuevoProducto.loadURL(url.format({
-        pathname: path.join(__dirname, "views/productos.html"),
+    /* nuevaNota.setMenu(null); */
+    nuevaNota.loadURL(url.format({
+        pathname: path.join(__dirname, "views/notas.html"),
         protocol: "file",
         slashes: true,
     }))
+    nuevaNota.on("closed", () => {
+        nuevaNota = null;
+    })
 }
+
+ipcMain.on("Nueva Nota", (e, nuevaNot) => {
+    mainWindow.webContents.send("Nueva Nota", nuevaNot);
+})
 
 const templateMenu = [
     {
         label: "Archivo",
         submenu: [
             {
-                label : "Nuevo Producto",
-                accelerator: "Ctrl+N",
+                label : "Nueva Nota",
+                accelerator: process.platform == "darwin" ? "command+N" : "Ctrl+N",
                 click() {
                     creandoNuevaVentana();
+                }
+            },
+            {
+                label: "Remover Notas",
+                accelerator: process.platform == "darwin" ? "command+Z" : "Ctrl+Z",
+                click(){
+                    mainWindow.webContents.send("Eliminar Notas");
+                }
+            },
+            {
+                label: "Salir",
+                accelerator: process.platform == "darwin" ? "command+W" : "Alt+F4",
+                click(){
+                    app.quit();
                 }
             }
         ]
     }
 ]
+
+if(process.platform === "darwin") {
+    templateMenu.unshift({
+        label: app.getName(),
+    })
+}
+
+if(process.env.NODE_ENV !== "production"){
+    templateMenu.push({
+        label: "DevTools",
+        submenu: [
+            {
+                label: "Show/Hide DevTools",
+                accelerator: "Ctrl+D",
+                click(item, focusedWindow){
+                    focusedWindow.toggleDevTools();
+                }
+            },
+            {
+                role: "reload"
+            }
+        ]
+    })
+}

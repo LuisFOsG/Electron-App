@@ -1,1 +1,50 @@
-<h1>Hola Mundo</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notas ColdHeart</title>
+    <link rel="stylesheet" href="./../public/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container p-4">
+        <div class="row" id="notas"></div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require("electron");
+        const notas = document.querySelector("#notas");
+
+        ipcRenderer.on("Nueva Nota", (e, nuevaNota) => {
+            const nuevaNotaTemplate = `
+                <div class="col-xs-4 p-2">
+                    <div class="card text-center">
+                        <div class="card-header">
+                            <h5 class="card-title">${nuevaNota.titulo}</h5>
+                        </div>
+                        <div class="card-body">
+                            ${nuevaNota.descripcion}
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-danger btn-sm">Eliminar Nota</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            notas.innerHTML += nuevaNotaTemplate;
+
+            const btns = document.querySelectorAll('.btn.btn-danger')
+            btns.forEach(btn => {
+                btn.addEventListener('click', e => {
+                    e.target.parentElement.parentElement.parentElement.remove()
+                })
+            })
+        });
+
+
+        ipcRenderer.on("Eliminar Notas", (e) => {
+            notas.innerHTML = "";
+        })
+    </script>
+</body>
+</html>

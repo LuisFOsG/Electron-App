@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregando Nueva Nota</title>
+    <link rel="stylesheet" href="./../public/css/bootstrap.min.css">
+</head>
+<body>
+    <form class="p-4">
+        <div class="form-group">
+            <input type="text" id="titulo" class="form-control" placeholder="Titulo" autofocus>
+        </div>
+        <div class="form-group">
+            <textarea id="text" class="form-control" placeholder="Descripcion"></textarea>
+        </div>
+        <br>
+        <br>
+        <button class="btn btn-primary btn-block">Guardar Nota</button>
+    </form>
+</body>
+
+<script>
+    const { ipcRenderer } = require("electron");
+
+    const form = document.querySelector("form");
+    form.addEventListener("submit", e => {
+
+        const titulo = document.querySelector("#titulo").value;
+        const text = document.querySelector("#text").value;
+        console.log(titulo);
+        console.log(text);
+
+        const nuevaNota = {
+            titulo: titulo,
+            descripcion: text,
+        };
+
+        ipcRenderer.send("Nueva Nota", nuevaNota);
+
+        e.preventDefault();
+    })
+</script>
+
+</html>
