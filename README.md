@@ -1,4 +1,5 @@
 # Primer Programa de Escritorio
+![Captura](https://github.com/LuisFOsG/Electron-App/blob/master/docs/main.png)
 
 ## Requiere
 * Nodejs
